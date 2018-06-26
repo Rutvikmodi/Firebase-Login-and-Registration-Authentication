@@ -22,6 +22,7 @@ public class Signup1Activity extends AppCompatActivity {
     private Button btnSignIn , btnSignUp, btnResetPassword;
     private ProgressBar progressBar;
     private FirebaseAuth auth;
+    int flag=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,28 +76,55 @@ public class Signup1Activity extends AppCompatActivity {
                 }
 
                 progressBar.setVisibility(View.VISIBLE);
-                //create user
-                auth.createUserWithEmailAndPassword(email, password)
-                        .addOnCompleteListener(Signup1Activity.this, new OnCompleteListener<AuthResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<AuthResult> task) {
-                                Toast.makeText(Signup1Activity.this, "createUserWithEmail:onComplete:" + task.isSuccessful(), Toast.LENGTH_SHORT).show();
-                                progressBar.setVisibility(View.GONE);
-                                // If sign in fails, display a message to the user. If sign in succeeds
-                                // the auth state listener will be notified and logic to handle the
-                                // signed in user can be handled in the listener.
-                                if (!task.isSuccessful()) {
-                                    Toast.makeText(Signup1Activity.this, "Authentication failed." + task.getException(),
-                                            Toast.LENGTH_SHORT).show();
-                                } else {
-                                    startActivity(new Intent(Signup1Activity.this, MainActivity.class));
-                                    finish();
-                                }
-                            }
-                        });
+                 //create user
+                     auth.createUserWithEmailAndPassword(email, password)
+                             .addOnCompleteListener(SignupActivity.this, new OnCompleteListener<AuthResult>() {
+                                 @Override
+                                 public void onComplete(@NonNull Task<AuthResult> task) {
+                                 progressBar.setVisibility(View.GONE);
+                                     flag = 1;
+                                     if (!task.isSuccessful()) {
+                                         Toast.makeText(SignupActivity.this, "You are already registered",
+                                                 Toast.LENGTH_SHORT).show();
+                                     }
+                                     else {
+                                         final String TAG = "Sorry";
+                                         btnSignUp.setEnabled(false);
+                                         final FirebaseUser user = auth.getCurrentUser();
+                                         user.sendEmailVerification()
+                                                 .addOnCompleteListener(SignupActivity.this, new OnCompleteListener() {
+                                                     @Override
+                                                     public void onComplete(@NonNull Task task) {
+                                                         // Re-enable button
+                                                         btnSignUp.setEnabled(true);
+
+                                                         if (flag == 1) {
+                                                             Toast.makeText(getApplicationContext(),
+                                                                     "Verification email sent to " + user.getEmail() + ". Please verify your email",
+                                                                     Toast.LENGTH_SHORT).show();
+                                                             flag = 0;
+                                                         } else {
+                                                             Log.e(TAG, "sendEmailVerification", task.getException());
+                                                             Toast.makeText(getApplicationContext(),
+                                                                     "Failed to send verification email.",
+                                                                     Toast.LENGTH_SHORT).show();
+                                                         }
+                                                     }
+                                                 });
+                                     }
+
+                                     // If sign in fails, display a message to the user. If sign in succeeds
+                                     // the auth state listener will be notified and logic to handle the
+                                     // signed in user can be handled in the listener.
+
+
+                                 }
+
+                             });
 
             }
         });
+        flag=0;
     }
 
     @Override

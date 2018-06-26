@@ -90,11 +90,16 @@ btnReset.setOnClickListener(new View.OnClickListener() {
                                 Toast.makeText(LoginActivity.this,getString(R.string.auth_failed),Toast.LENGTH_LONG).show();
                             }
                         }else {
-                            Intent intent = new Intent(LoginActivity.this,MainActivity.class);
-                            startActivity(intent);
-                            finish();
-                        }
-
+                              if(auth.getCurrentUser()!=null && auth.getCurrentUser().isEmailVerified()) {
+                                  Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                  startActivity(intent);
+                                  finish();
+                              }
+                              else
+                              {
+                                  Toast.makeText(getApplicationContext(),"Please verify your email first",Toast.LENGTH_SHORT).show();
+                              }
+                          }
                     }
                 });
             }
